@@ -263,8 +263,8 @@ class ExpectedValuesCharts :
         plt.show()
         
 def main() :
-    inFilePath = r"C:\AI&ML\my-AI-ML-journey\Python-AIML\002_Probability\ExpectedValue\DataSets\SalesDataRecords.xlsx"
-    outFilePath = r"C:\AI&ML\my-AI-ML-journey\Python-AIML\002_Probability\ExpectedValue\DataSets\OutData\OutSalesData.xlsx"
+    inFilePath = r"C:\AI&ML\my-AI-ML-journey\Python-AIML\002_Probability\003_ExpectedValue\DataSets\SalesDataRecords.xlsx"
+    outFilePath = r"C:\AI&ML\my-AI-ML-journey\Python-AIML\002_Probability\003_ExpectedValue\DataSets\OutData\OutSalesData.xlsx"
     
     try :
         expectedValueCalculator = ExpectedValueCalculator(inFilePath)
