@@ -41,5 +41,101 @@ class ManufacturingDataSet :
     
     def __init__(self, inFilePath : str) :
         self.inFilePath = inFilePath
-        self.records = List[ProductRecord] = []
+        self.records : List[ProductRecord] = []
     
+    def load(self) -> None :
+        try :
+            df = pd.read_excel(self.inFilePath)
+        except Exception as exceptObject :
+            raise DataLoadingError(f"Fatal Error! Failed to read the excel file : {exceptObject}\n")
+        
+        if not self.REQUIRED_COLUMNS.issubset(df.columns) :
+            missingColumns = self.REQUIRED_COLUMNS - set(df.columns)
+            raise DataLoadingError(f"Fatal Error! Missing the Required columns for analysis : {missingColumns}\n")
+        
+        for _, outRecord in df.iterrows() :
+            productRecord = ProductRecord(
+                product_id = str(outRecord["product_id"]),
+                is_defective = bool(outRecord["is_defective"]),
+                weight_g = float(outRecord["weight_g"]),
+                length_mm = float(outRecord["length_mm"]),
+                batch_id = str(outRecord["batch_id"]),
+                machine_id = str(outRecord["machine_id"]),
+                timestamp = outRecord["timestamp"]
+            )
+            self.records.append(productRecord)
+            
+    def getDefectProbability(self) -> float :
+        if not self.records :
+            raise DataLoadingError("Fatal Error! Loaded Data is empty...")
+        
+        defectCount = sum(1 for foundDefectProduct in self.records if foundDefectProduct.is_defective) 
+        return defectCount / len(self.records)
+    
+    def getMachineWiseProbabilities(self) -> dict :
+        productDataFrame = pd.DataFrame([vars(outRecord) for outRecord in self.records])
+        outStatistics = productDataFrame.groupby("machine_id")["is_defective"].mean().to_dict()
+        return outStatistics
+    
+    def getBatchWiseStatistics(self) -> dict :
+        productDataFrame = pd.DataFrame([vars(outRecord) for outRecord in self.records])
+        outStatistics = productDataFrame.groupby("batch_id")["is_defective"].mean().to_dict()
+        return outStatistics
+    
+class ProbabilityTrial :
+    def __init__(self, inProbability : float):
+        if not (0 <= inProbability <= 1) :
+            raise InvalidTrailError("Fatal Error! Probability must be in between 0 and 1")
+        self.inProbability = inProbability
+        
+    def run(self) -> bool :
+        return random.random() < self.inProbability
+    
+class TrialRunner :
+    def __init__(self, inNumTrials : int, inTrial : ProbabilityTrial):
+        if inNumTrials <= 0 :
+            raise InvalidTrailError("Fatal Error! The input for number of trials must be positive")
+        
+        self.inNumTrials =inNumTrials
+        self.inTrial = inTrial
+        self.trialResults : List[bool] = []
+        
+    def executeTrials(self) -> None :
+        for _ in range(self.inNumTrials) :
+            trialOutCome = self.inTrial.run()
+            self.trialResults.append(trialOutCome)
+    
+    def generateSummary(self) -> dict :
+        defectiveCounts = sum(self.trialResults)
+        
+        return {
+            "totalTrials" : self.inNumTrials,
+            "defectiveCount" : defectiveCounts,
+            "nonDefectiveCounts" : self.inNumTrials - defectiveCounts,
+            "estimatedDefectiveProbability" : defectiveCounts / self.inNumTrials
+        }
+        
+def main() :
+    try :
+        inFilePath = r"C:\AI&ML\my-AI-ML-journey\Python-AIML\002_Probability\004_Trials\DataSets\ManufacturingQuality.xlsx"
+        manuFacturingData = ManufacturingDataSet(inFilePath)
+        manuFacturingData.load()
+        
+        defectiveProbability = manuFacturingData.getDefectProbability()
+        print(f"\nOverall Defect Probability is : {defectiveProbability : .4f}")
+        
+        machineProbability = manuFacturingData.getMachineWiseProbabilities()
+        print(f"\nDisplaying Machine Wise Defect Probabilities...")
+        for outMachine, outProbability in machineProbability.items() :
+            print(f"{outMachine} : {outProbability : .4f}")
+            
+        batchProbability = manuFacturingData.getBatchWiseStatistics()
+        print(F"\nDisplaying Batch Wise Probabilities...")
+        for outBatch, outProbability in batchProbability.items() :
+            print(f"{outBatch} : {outProbability : .4f}")
+              
+    except (DataLoadingError, InvalidTrailError) as exceptObject :
+        print(f"Error : {exceptObject}")
+        
+if __name__ == "__main__":
+    main()
