@@ -20,3 +20,6 @@
 - Predicts the `average outcome` over many trials
 - Helps compare different Strategies OR Decisions
 - Essential in Statistics, Economics, Finance, and Data Science
+
+### Trial :
+- Single execution of the random experiment.
