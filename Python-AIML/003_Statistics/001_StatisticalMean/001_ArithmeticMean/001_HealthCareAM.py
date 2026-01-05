@@ -52,7 +52,7 @@ class HealthCareAMEngine :
         
         return pd.DataFrame(
             meanResults.items(),
-            columns = ["Featurename", "ArithmeticMean"]
+            columns = ["FeatureName", "ArithmeticMean"]
         ).sort_values(by = "ArithmeticMean", ascending = False)
         
         
@@ -97,7 +97,7 @@ class HealthCareAMApp :
     @staticmethod
     def run() -> None :
         try :
-            inFilePath = r""
+            inFilePath = r"C:\AI&ML\my-AI-ML-journey\Python-AIML\003_Statistics\001_StatisticalMean\001_ArithmeticMean\DataSets\HealthCareRecords.xlsx"
             
             healthCareAMAppObject = HealthCareAMEngine(inFilePath = inFilePath)
             
@@ -129,7 +129,7 @@ class HealthCareAMApp :
         
         for _, outRow in inMeanDataFrame.iterrows() :
             print(
-                f"_ The average value of {outRow['FeatureNAme']} "
+                f"_ The average value of {outRow['FeatureName']} "
                 f"is {outRow['ArithmeticMean'] : .2f}, Represents the "
                 f" Baseline behavior of the patients population."
             )
